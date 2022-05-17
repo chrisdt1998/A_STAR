@@ -20,11 +20,11 @@ class AStarSearch:
     def __init__(self, start, end, walls, grid_size, include_diag=False):
         """
         Initializing the A* search class
-        :param start: x,y coordinate of starting position.
+        :param start: x,y coordinate of starting node.
         :type start: list
-        :param end: x,y coordinate of ending position.
+        :param end: x,y coordinate of ending node.
         :type end: list
-        :param walls: list of x,y coordinates of all wall blocks.
+        :param walls: list of x,y coordinates of all wall nodes.
         :type walls: list
         :param grid_size: size n of n x n grid
         :type grid_size: int
@@ -54,7 +54,7 @@ class AStarSearch:
         :type node: list
         :param from_start: True if computing heuristic while searching. False if backtracking to find optimal path.
         :type from_start: bool
-        :return: Heuristic value of a particular position.
+        :return: Heuristic value of a particular node.
         :rtype: int
         """
         if from_start:
@@ -74,10 +74,10 @@ class AStarSearch:
         Method to compute the cost from current node to the next node. Is just 1 if no diagonals included.
         :param node: x,y coordinate of the node.
         :type node: list
-        :param move:
-        :type move:
-        :return:
-        :rtype:
+        :param move: x,y coordinate of move, used for checking if a move is diagonal.
+        :type move: list
+        :return: cost of move
+        :rtype: int
         """
         node_cost = self.nodes['costs'][node[0]][node[1]]
         if node_cost != math.inf:
@@ -92,8 +92,9 @@ class AStarSearch:
 
     def get_next_moves(self, node):
         """
-        Method to compute all possible moves from a particular position
-        :param node: x,y coordinate of position in question
+        Method to compute all possible moves from a particular node in clockwise order. Only considers diagonal moves
+        if self.include_diag is True.
+        :param node: x,y coordinate of node.
         :type node: list
         :return: list of possible moves (does consider walls yet)
         :rtype: list
@@ -129,10 +130,10 @@ class AStarSearch:
 
     def search_neighbours(self, node, move):
         """
-        This method checks if a move from a position is allowed and if so, it stores the cost and heuristic values of
+        This method checks if a move from a node is allowed and if so, it stores the cost and heuristic values of
         this move.
-        :param node: x,y coordinate of the position.
-        :type node:list
+        :param node: x,y coordinate of the node.
+        :type node: list
         :param move: x,y coordinate of the move.
         :type move: list
         """
@@ -153,9 +154,9 @@ class AStarSearch:
 
     def get_position(self):
         """
-        This method computes the next node to visit based on the A* algorithm, i.e. it chooses the move with the
-        lowest cost.
-        :return: x,y coordinate of chosen position
+        This method computes the next node to visit based on the A* algorithm, i.e. it chooses the move which minimizes
+        g(n) + h(n) where g(n) is the cost to the node n and h(n) is the heuristic of node n.
+        :return: x,y coordinate of chosen node
         :rtype: list
         """
         scores = self.nodes['heuristics'] + self.nodes['costs']
@@ -173,6 +174,11 @@ class AStarSearch:
         return node
 
     def backtrack(self):
+        """
+        This method computes the shortest path, once the search is finished, by backtracking.
+        :return: The shortest path from start to finish.
+        :rtype: list
+        """
         shortest_path = [self.end.tolist()]
         node = self.end.tolist()
         counter = 0
@@ -194,6 +200,9 @@ class AStarSearch:
 
 
     def search(self):
+        """
+        Call this method to start the A* searching process.
+        """
         node = self.start
         self.nodes['mask'][node[0]][node[1]] = 1
         self.nodes['heuristics'][node[0]][node[1]] = self.compute_heuristic(node)
@@ -214,17 +223,16 @@ class AStarSearch:
                 print("Could not find path")
                 break
 
-        print(self.nodes['mask'])
-        print(self.nodes['heuristics'])
-        print(self.nodes['costs'])
-        print(self.nodes['costs'] + self.nodes['heuristics'])
-        print(self.stored_nodes)
-        print("Search finished")
-
-
 
 class CreateGrid(GridLayout):
+    """
+    This is a class which inherits the GridLayout class from Kivy. The idea for this class is to visualize the A*
+    algorithm using Kivy.
+    """
     def __init__(self, **kwargs):
+        """
+        Initializing the class.
+        """
         super().__init__(**kwargs)
         self.padding = 10
         self.cols = 20
@@ -247,6 +255,13 @@ class CreateGrid(GridLayout):
             self.add_widget(self.b[i])
 
     def button_clicked(self, button):
+        """
+        This method is called when a button on the Kivy UI is clicked. The first button click is the starting node,
+        the second button click is the ending node and the following 12 buttons clicked are the walls. After that, the
+        searching algorithm automatically starts.
+        :param button: Button clicked
+        :type button: Kivy Widget
+        """
         if self.counter == 0:
             button.background_normal = ''
             anim = Animation(background_color = (0, 1, 0, .85))
@@ -277,6 +292,12 @@ class CreateGrid(GridLayout):
         self.counter += 1
 
     def animate(self, dt):
+        """
+        This method is responsible for the animations of the buttons for when the searching is happening and the
+        backtracking.
+        :param dt: change in time. Parameter mandatory for Kivy but not used.
+        :type dt: None
+        """
         if self.iter < len(self.all_nodes):
             index = (self.all_nodes[self.iter][0] * self.grid_size) + self.all_nodes[self.iter][1]
             self.b[index].background_normal = ''
@@ -301,17 +322,15 @@ class CreateGrid(GridLayout):
 
 
 class AStarApp(App):
+    """
+    This class represents the Kivy Application UI. Is only used to created the grid, can be used for further work such
+    as creating new windows etc.
+    """
     def build(self):
         return CreateGrid()
 
+if __name__ == '__main__':
+    num_clicks = 0
+    AStarApp().run()
 
-
-
-
-
-
-num_clicks = 0
-AStarApp().run()
-
-# AStarApp().animate(visited_nodes, 10)
 
