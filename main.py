@@ -186,7 +186,7 @@ class AStarSearch:
             neighbouring_nodes = self.get_next_moves(node).tolist()
             total_cost = 1000
             for n in neighbouring_nodes:
-                if self.nodes['costs'][n[0]][n[1]] != math.inf:
+                if self.nodes['costs'][n[0]][n[1]] != math.inf and self.nodes['mask'][n[0]][n[1]] == 1:
                     n_cost = self.nodes['costs'][n[0]][n[1]]
                     if n_cost < total_cost:
                         chosen_n = n
