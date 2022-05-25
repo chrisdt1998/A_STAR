@@ -34,6 +34,7 @@ class AStarSearch:
         self.start = np.array(start)
         self.end = np.array(end)
         self.include_diag = include_diag
+        self.failed = False
 
         self.max_size = grid_size - 1
         # Mask contains grid of -1 if node is a wall, 0 if it is open and 1 if it is closed (visited)
@@ -165,6 +166,7 @@ class AStarSearch:
         index = np.argwhere(scores == scores_filtered.min())
 
         # If there are multiple options then explore the one with the smallest heuristic score.
+        node = None
         score = math.inf
         for i in index:
             if self.nodes['mask'][i[0]][i[1]] == 0:
@@ -215,12 +217,17 @@ class AStarSearch:
                 self.search_neighbours(node, move)
 
             node = self.get_position()
+            if node is None:
+                print("Could not find path")
+                self.failed = True
+                break
             self.nodes['mask'][node[0]][node[1]] = 1
             self.stored_nodes.append(node.tolist())
 
             counter += 1
             if counter > self.max_size ** 2:
                 print("Could not find path")
+                self.failed = True
                 break
 
 
@@ -277,10 +284,11 @@ class CreateGrid(GridLayout):
         elif 1 < self.counter <= 2 + self.num_walls:
             if self.counter == 2 + self.num_walls:
                 print("Start running")
-                astar = AStarSearch(self.start, self.end, self.walls, self.grid_size, False)
+                astar = AStarSearch(self.start, self.end, self.walls, self.grid_size, True)
                 astar.search()
-                self.shortest_path = astar.backtrack()
-                print(len(self.shortest_path))
+                if astar.failed is False:
+                    self.shortest_path = astar.backtrack()
+                    print(len(self.shortest_path))
                 self.all_nodes = astar.stored_nodes
                 Clock.schedule_interval(self.animate, 1 / self.speed)
                 print("Visualization finished")
@@ -309,7 +317,7 @@ class CreateGrid(GridLayout):
             else:
                 anim = Animation(background_color=(0.5, 0, 0.5, .85))
                 anim.start(self.b[index])
-        elif self.iter >= len(self.all_nodes) and self.iter < len(self.all_nodes) + len(self.shortest_path):
+        elif self.iter >= len(self.all_nodes) and self.iter < len(self.all_nodes) + len(self.shortest_path) and len(self.shortest_path) > 0:
             i = self.iter - len(self.all_nodes)
             index = (self.shortest_path[i][0] * self.grid_size) + self.shortest_path[i][1]
             if self.shortest_path[i] != self.end and self.shortest_path[i] != self.start:
