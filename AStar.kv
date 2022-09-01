@@ -1,0 +1,22 @@
+WindowManager:
+    id: windowmanager
+    StartWindow:
+    SearchWindow:
+        id: searchwindow
+
+<StartWindow>:
+    name: "startwindow"
+
+    FloatLayout:
+        Button:
+            text: "Click to start..."
+            size_hint: 1, 1
+            on_release:
+                app.root.current = "searchwindow"
+                root.manager.transition.direction = "left"
+
+
+<SearchWindow>:
+    name: "searchwindow"
+    id: searchwindow
+

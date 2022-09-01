@@ -1,8 +1,0 @@
-GridView:
-
-<GridView>:
-    grid: grid
-    GridLayout:
-        id: grid
-        rows: 10
-        cols: 10

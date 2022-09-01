@@ -30,9 +30,7 @@ import numpy as np
 # print(scores_filtered)
 # print(np.argwhere(scores == scores_filtered.min()).shape)
 
-l = [[1,2], [52, 3], [9, 3]]
-l = np.array(l)
-a = np.array([1,2])
-b = np.array([25,3])
-print((a == l).all(1).any())
-print((b == l).all(1).any())
+l = np.array([[1,2], [52, 3], [9, 3]])
+
+print(l[0][1])
+print(l.shape)
